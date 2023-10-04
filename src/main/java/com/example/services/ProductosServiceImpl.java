@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.dao.ProductosDao;
+import com.example.exceptions.NombreNoEncontradoException;
+import com.example.exceptions.ProductoVacioException;
 import com.example.model.Producto;
 
 /**
@@ -34,11 +36,18 @@ public class ProductosServiceImpl implements ProductosService{
     public double getPrecio(String nombre) {
         List<Producto> productos = dao.findAll();
         double precio = 0;
-
+        boolean comprobar = false;
+            
         for (Producto productoDeLaLista : productos) {
             if(productoDeLaLista.getNombre().equalsIgnoreCase(nombre)){
                 precio = productoDeLaLista.getPrecio();
+                comprobar = true;
+                break;
             }
+        }
+
+        if(!comprobar){
+            throw new NombreNoEncontradoException("El producto: '" + nombre + "', no coincide con ningún producto en la base de datos.");
         }
 
         return precio;
@@ -49,6 +58,9 @@ public class ProductosServiceImpl implements ProductosService{
      */
     @Override
     public void setStock(Producto producto){
+        if (producto.getNombre()==null) {
+            throw new ProductoVacioException("El producto que ha llegado esta vacio");
+        }
         dao.save(producto);
     }
     
